@@ -38,7 +38,7 @@
 defun suma
     push {r4-r11,lr}
     // Insertar código a continuación
-ADD R0,R0,R1
+ADD R0,R1
     // Retorno, antes R0 debe tener el valor correcto
     pop {r4-r11,pc}
 endfun suma
@@ -59,7 +59,22 @@ endfun suma
 defun sumatoria
     push {r4-r11,lr}
     // Insertar código a continuación
-
+    MOV R2,#0
+    MOV R3,#0
+    MOV R4,#0
+    
+0:
+    CMP R4,R0
+    BGE 1f   
+    LDR R5,[R1,R4,LSL #2]
+    ASR R6,R5,#31
+    ADDS R2,R5 //Suma de la parte baja.
+    ADC R3,R6  //Suma de la parte alta.
+    ADD R4,#1
+    B 0b
+1:
+    MOV R0,R2
+    MOV R1,R3
     // Retorno, antes R1:R0 debe tener el valor correcto
     pop {r4-r11,pc}
 endfun sumatoria
@@ -80,7 +95,26 @@ endfun sumatoria
 defun posicion_maximo
     push {r4-r11,lr}
     // Insertar código a continuación
+    MOV R2,#0
+    CMP R0,#1
+    BLS 0f
+    LDR R4,[R1,R2,LSL#2]
+    MOV R3,#1
+1:
 
+    CMP R3,R0
+    BGE  0f
+    LDR R5,[R1,R3,LSL #2]  
+    CMP R4,R5
+    BGE  2f
+    MOV R4,R5
+    MOV R2,R3
+2:
+    ADD R3,#1
+B 1b
+
+0:
+    MOV R0,R2
     // Retorno, antes R0 debe tener el valor correcto
     pop {r4-r11,pc}
 endfun posicion_maximo
@@ -105,7 +139,25 @@ endfun posicion_maximo
 defun ordenar_en_sitio_menor_a_mayor
     push {r4-r11,lr}
     // Insertar código a continuación
+    SUB R6,R0,#1
+    MOV R4,R1
+0:
+    CMP R6,#0
+    BLE 1f       // BLE compara si es menor o igual.
+    ADD R0,R6,#1 // Despeje el n de la ecuacion K=n-1
+    MOV R1,R4
 
+    BL posicion_maximo // j=R0 segun la pagina 13 del apunte
+
+    LDR R1,[R4,R6,LSL#2] // carga desde la memoria en el registro
+    LDR R7,[R4,R0,LSL#2] // carga desde la memoria en el registro
+
+    STR R1,[R4,R0,LSL#2] // guarda desde el registro en la memoria
+    STR R7,[R4,R6,LSL#2] // guarda desde el registro en la memoria
+
+    SUB R6,#1
+    B 0b
+1:
     // Retorno
     pop {r4-r11,pc}
 endfun ordenar_en_sitio_menor_a_mayor
